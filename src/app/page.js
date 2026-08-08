@@ -4,10 +4,15 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Layers, Award, FileQuestion, ArrowRight, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
 
+const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://localhost:5000/api'
+  : (process.env.NEXT_PUBLIC_API_URL || 'https://te-app-backend.vercel.app/api');
+
 export default function Home() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [studentName, setStudentName] = useState('');
+  const [publicTests, setPublicTests] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -20,8 +25,21 @@ export default function Home() {
       } catch (e) {
         console.error('Error parsing student data', e);
       }
+    } else {
+      const fetchPublicTests = async () => {
+        try {
+          const res = await fetch(`${API_BASE}/student/tests`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.tests)) {
+            setPublicTests(data.tests);
+          }
+        } catch (e) {
+          console.error('Error fetching public tests', e);
+        }
+      };
+      fetchPublicTests();
     }
-  }, []);
+  }, [isLoggedIn]);
 
   const handleAction = () => {
     if (isLoggedIn) {
@@ -170,6 +188,42 @@ export default function Home() {
 
         </div>
       </main>
+
+      {/* Public Mock Tests Section */}
+      {!isLoggedIn && publicTests.length > 0 && (
+        <section className="relative w-full py-12 z-20 bg-purple-50/20 border-t border-b border-purple-50/30">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-2xl font-black text-gray-900 mb-6 text-center">Available Public Mock Exams</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {publicTests.map((t) => (
+                <div key={t._id} className="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-purple-300 hover:shadow-md transition-all">
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-[10px] font-extrabold text-[#572C7A] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 uppercase">
+                        {t.subject}
+                      </span>
+                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase">
+                        Guest Attempt Allowed
+                      </span>
+                    </div>
+                    <h3 className="text-base font-black text-gray-900 mb-2">{t.title}</h3>
+                    <div className="text-xs text-gray-500 space-y-1 mt-3">
+                      <div>Duration: <strong>{t.durationMinutes} Minutes</strong></div>
+                      <div>Max Marks: <strong>{t.totalMarks} Marks</strong></div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => router.push(`/test/${t._id}`)} 
+                    className="w-full mt-6 bg-[#572C7A] hover:bg-[#431f60] text-white py-2.5 rounded-full font-bold text-sm shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    Attempt Test <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Category cards section at the bottom */}
       <section className="relative w-full bg-gray-50/50 border-t border-gray-50/80 py-16 z-20">

@@ -19,6 +19,12 @@ export default function TestSimulator({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Guest Mode States
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [guestName, setGuestName] = useState('');
+  const [guestRollNo, setGuestRollNo] = useState('');
+
   // Exam Attempt States
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({}); // { qId: selectedOption }
@@ -39,18 +45,6 @@ export default function TestSimulator({ params }) {
 
   // Load profile and test questions
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const studentDataStr = localStorage.getItem('studentData');
-    const studentId = localStorage.getItem('studentId');
-
-    if (!token || !studentDataStr || !studentId) {
-      sessionStorage.setItem('redirectAfterLogin', `/test/${testId}`);
-      router.replace('/login');
-      return;
-    }
-
-    setStudent(JSON.parse(studentDataStr));
-
     const loadTestData = async () => {
       try {
         const res = await fetch(`${API_BASE}/student/tests/${testId}/questions`);
@@ -66,6 +60,23 @@ export default function TestSimulator({ params }) {
             initialStatus[q._id] = idx === 0 ? 'visited' : 'not_visited';
           });
           setStatusMap(initialStatus);
+
+          // Deferred auth check!
+          const token = localStorage.getItem('accessToken');
+          const studentDataStr = localStorage.getItem('studentData');
+          const studentId = localStorage.getItem('studentId');
+
+          if (token && studentDataStr && studentId) {
+            setStudent(JSON.parse(studentDataStr));
+          } else if (data.test.allowGuest) {
+            setIsGuestMode(true);
+            setShowGuestForm(true);
+          } else {
+            // Guest not allowed, redirect to login
+            sessionStorage.setItem('redirectAfterLogin', `/test/${testId}`);
+            router.replace('/login');
+            return;
+          }
         } else {
           setError(data.message || 'Failed to load test questions.');
         }
@@ -240,16 +251,22 @@ export default function TestSimulator({ params }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          studentId: student._id,
+          studentId: student ? student._id : null,
           answers: formattedAnswers,
-          timeTakenMinutes: timeTaken
+          timeTakenMinutes: timeTaken,
+          guestName: guestName,
+          guestRollNo: guestRollNo
         })
       });
 
       const data = await res.json();
       if (data.success) {
         alert(`Test submitted successfully! Your score: ${data.result.marksObtained}/${data.result.totalMarks}`);
-        router.replace('/dashboard');
+        if (isGuestMode) {
+          router.replace('/');
+        } else {
+          router.replace('/dashboard');
+        }
       } else {
         setError(data.message || 'Submission failed.');
         setSubmitting(false);
@@ -281,6 +298,66 @@ export default function TestSimulator({ params }) {
 
     setIsExamStarted(true);
   };
+
+  if (showGuestForm) {
+    return (
+      <div className="min-h-screen bg-[#121420] flex items-center justify-center font-sans p-6 relative">
+        <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-2xl space-y-6 relative z-10">
+          <div className="text-center space-y-2">
+            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-100 uppercase inline-block">
+              Guest Practice Exam
+            </span>
+            <h2 className="text-2xl font-black text-gray-900">{test?.title}</h2>
+            <p className="text-gray-500 text-xs leading-relaxed">
+              No login required. Please enter your name to personalize your results report.
+            </p>
+          </div>
+
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!guestName.trim()) {
+                alert('Please enter your name to start the exam.');
+                return;
+              }
+              setShowGuestForm(false);
+            }} 
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Your Full Name</label>
+              <input
+                type="text"
+                required
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="e.g. Aarav Sharma"
+                className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#552479] text-gray-900 font-semibold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Reference Roll No (Optional)</label>
+              <input
+                type="text"
+                value={guestRollNo}
+                onChange={(e) => setGuestRollNo(e.target.value)}
+                placeholder="e.g. GUEST-9843"
+                className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#552479] text-gray-900 font-semibold"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-[#552479] hover:bg-[#431c60] text-white py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+            >
+              Start Guest Exam <ArrowRight className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -392,17 +469,17 @@ export default function TestSimulator({ params }) {
             {/* Candidate Card */}
             <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
               <div className="flex items-center gap-4 border-b border-gray-100 pb-4">
-                {student?.avatar ? (
+                {(student && student.avatar) ? (
                   <img src={student.avatar} alt="Student" className="w-14 h-14 rounded-2xl object-cover border border-purple-200" />
                 ) : (
                   <div className="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#552479] font-black text-xl shrink-0">
-                    {getInitials(student?.name)}
+                    {getInitials(student ? student.name : guestName)}
                   </div>
                 )}
                 <div className="text-xs">
-                  <span className="block text-[8px] font-extrabold text-gray-400 uppercase">STUDENT PROFILE</span>
-                  <h4 className="font-black text-gray-950 text-sm mt-0.5 leading-none">{student?.name}</h4>
-                  <p className="font-bold text-[#552479] mt-1">{student?.rollNo}</p>
+                  <span className="block text-[8px] font-extrabold text-gray-400 uppercase">CANDIDATE PROFILE</span>
+                  <h4 className="font-black text-gray-950 text-sm mt-0.5 leading-none">{student ? student.name : guestName}</h4>
+                  <p className="font-bold text-[#552479] mt-1">{student ? student.rollNo : (guestRollNo || 'GUEST')}</p>
                 </div>
               </div>
 
@@ -486,9 +563,9 @@ export default function TestSimulator({ params }) {
           <div className="flex items-center gap-3 text-right hidden sm:flex">
             <div>
               <span className="block text-[8px] text-slate-400 font-extrabold leading-none tracking-wide">CANDIDATE</span>
-              <span className="text-xs font-black text-slate-900 block mt-0.5">{student?.name}</span>
+              <span className="text-xs font-black text-slate-900 block mt-0.5">{student ? student.name : guestName}</span>
             </div>
-            {student?.avatar ? (
+            {(student && student.avatar) ? (
               <img
                 src={student.avatar}
                 alt="Avatar"
@@ -496,7 +573,7 @@ export default function TestSimulator({ params }) {
               />
             ) : (
               <div className="w-9 h-9 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#552479] font-black text-xs shrink-0 shadow-sm">
-                {getInitials(student?.name)}
+                {getInitials(student ? student.name : guestName)}
               </div>
             )}
           </div>
@@ -619,8 +696,8 @@ export default function TestSimulator({ params }) {
               </div>
               <div className="text-xs">
                 <span className="block text-[8px] font-extrabold text-slate-400 uppercase leading-none tracking-wide">CANDIDATE CARD</span>
-                <h4 className="font-black text-slate-850 mt-0.5">{student?.name}</h4>
-                <p className="text-[10px] text-purple-700 font-bold leading-none mt-1">{student?.rollNo}</p>
+                <h4 className="font-black text-slate-850 mt-0.5">{student ? student.name : guestName}</h4>
+                <p className="text-[10px] text-purple-700 font-bold leading-none mt-1">{student ? student.rollNo : (guestRollNo || 'GUEST')}</p>
               </div>
             </div>
           </div>
