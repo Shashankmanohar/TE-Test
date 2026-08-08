@@ -13,6 +13,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [studentName, setStudentName] = useState('');
   const [publicTests, setPublicTests] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -47,6 +48,46 @@ export default function Home() {
     } else {
       router.push('/login');
     }
+  };
+
+  const handleCategoryClick = (category) => {
+    if (isLoggedIn) {
+      router.push('/dashboard');
+    } else {
+      setSelectedCategory(category);
+    }
+  };
+
+  const getFilteredCategoryTests = () => {
+    if (!selectedCategory) return [];
+    if (selectedCategory === 'JEE') {
+      return publicTests.filter(t => 
+        t.batch === 'Target JEE' || 
+        t.batch === 'All Batches' || 
+        t.subject === 'Mathematics' || 
+        t.subject === 'Physics' || 
+        t.subject === 'Chemistry'
+      );
+    }
+    if (selectedCategory === 'NEET') {
+      return publicTests.filter(t => 
+        t.batch === 'Target NEET' || 
+        t.batch === 'All Batches' || 
+        t.subject === 'Biology' || 
+        t.subject === 'Physics' || 
+        t.subject === 'Chemistry'
+      );
+    }
+    if (selectedCategory === 'Boards') {
+      return publicTests.filter(t => 
+        t.batch?.toLowerCase().includes('class') || 
+        t.batch === 'All Batches'
+      );
+    }
+    if (selectedCategory === 'NCERT') {
+      return publicTests;
+    }
+    return [];
   };
 
   const handleLogout = () => {
@@ -189,37 +230,91 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Public Mock Tests Section */}
+      {/* Public Mock Tests Section with Premium Marketing Design */}
       {!isLoggedIn && publicTests.length > 0 && (
-        <section className="relative w-full py-12 z-20 bg-purple-50/20 border-t border-b border-purple-50/30">
-          <div className="max-w-4xl mx-auto px-6">
-            <h2 className="text-2xl font-black text-gray-900 mb-6 text-center">Available Public Mock Exams</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {publicTests.map((t) => (
-                <div key={t._id} className="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:border-purple-300 hover:shadow-md transition-all">
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-[10px] font-extrabold text-[#572C7A] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 uppercase">
-                        {t.subject}
-                      </span>
-                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase">
-                        Guest Attempt Allowed
-                      </span>
-                    </div>
-                    <h3 className="text-base font-black text-gray-900 mb-2">{t.title}</h3>
-                    <div className="text-xs text-gray-500 space-y-1 mt-3">
-                      <div>Duration: <strong>{t.durationMinutes} Minutes</strong></div>
-                      <div>Max Marks: <strong>{t.totalMarks} Marks</strong></div>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => router.push(`/test/${t._id}`)} 
-                    className="w-full mt-6 bg-[#572C7A] hover:bg-[#431f60] text-white py-2.5 rounded-full font-bold text-sm shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    Attempt Test <ArrowRight className="w-4 h-4" />
-                  </button>
+        <section className="relative w-full py-16 z-20 px-4 md:px-8">
+          <div className="max-w-6xl mx-auto bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden shadow-2xl border border-purple-500/20">
+            {/* Visual glow blobs */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20"></div>
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Left Column: Full Marketing Copy */}
+              <div className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 text-amber-300 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                  ⚡ INSTANT DEMO • NO REGISTRATION
                 </div>
-              ))}
+                
+                <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
+                  Experience India's Best <br className="hidden sm:inline" />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-purple-300 to-indigo-200">
+                    CBT Test Simulator
+                  </span> Free!
+                </h2>
+
+                <p className="text-slate-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
+                  Try our state-of-the-art Computer Based Test (CBT) prep environment replica. Instantly practice with official exam patterns, active question navigation panels, color-coded legends, and subject toggles.
+                </p>
+
+                {/* Key value propositions list */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-slate-200 text-sm font-semibold pt-2">
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span>Real JEE/NEET CBT UI Replica</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span>Automatic Negative Marking</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span>Detailed Scorecards on Submit</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span>Fully Mobile & Desktop Friendly</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Live Guest Tests List */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className="text-center lg:text-left mb-2">
+                  <span className="text-[10px] text-purple-300 font-extrabold uppercase tracking-widest block">
+                    CHOOSE A LIVE PAPER TO ATTEMPT
+                  </span>
+                </div>
+
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  {publicTests.map((t) => (
+                    <div 
+                      key={t._id} 
+                      className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:border-purple-400/50 hover:bg-white/10 transition-all duration-300 group flex items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-black text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded border border-purple-800 uppercase tracking-wider">
+                            {t.subject}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-bold text-white truncate">{t.title}</h4>
+                        <div className="flex gap-3 text-[10px] text-slate-400 font-semibold">
+                          <span>{t.durationMinutes} Mins</span>
+                          <span>•</span>
+                          <span>{t.totalMarks} Marks</span>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={() => router.push(`/test/${t._id}`)}
+                        className="bg-white hover:bg-amber-400 text-slate-900 hover:text-slate-950 px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-md transition-all duration-300 shrink-0 flex items-center gap-1 group-hover:gap-1.5 cursor-pointer"
+                      >
+                        Attempt <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -241,7 +336,7 @@ export default function Home() {
                   Full syllabus mock tests designed with negative marking and JEE test patterns.
                 </p>
               </div>
-              <button onClick={handleAction} className="text-blue-600 hover:text-blue-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              <button onClick={() => handleCategoryClick('JEE')} className="text-blue-600 hover:text-blue-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer">
                 Practice Now <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -257,7 +352,7 @@ export default function Home() {
                   Comprehensive Biology, Physics, and Chemistry practice papers aligned with NEET syllabus.
                 </p>
               </div>
-              <button onClick={handleAction} className="text-emerald-600 hover:text-emerald-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              <button onClick={() => handleCategoryClick('NEET')} className="text-emerald-600 hover:text-emerald-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer">
                 Practice Now <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -273,7 +368,7 @@ export default function Home() {
                   Class 11th and 12th state and CBSE board chapter-wise preparation tests.
                 </p>
               </div>
-              <button onClick={handleAction} className="text-amber-600 hover:text-amber-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              <button onClick={() => handleCategoryClick('Boards')} className="text-amber-600 hover:text-amber-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer">
                 Practice Now <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -289,7 +384,7 @@ export default function Home() {
                   Access standard NCERT exercises and previous years' question banks with solutions.
                 </p>
               </div>
-              <button onClick={handleAction} className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+              <button onClick={() => handleCategoryClick('NCERT')} className="text-purple-600 hover:text-purple-700 font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer">
                 Practice Now <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -297,6 +392,98 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Category Tests Modal Overlay */}
+      {selectedCategory && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-purple-100 w-full max-w-lg rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-6 pb-4 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-black text-[#572C7A] bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100 uppercase tracking-wider">
+                  {selectedCategory === 'JEE' && 'IIT-JEE Prep Category'}
+                  {selectedCategory === 'NEET' && 'NEET Medical Category'}
+                  {selectedCategory === 'Boards' && 'Board Exams Category'}
+                  {selectedCategory === 'NCERT' && 'NCERT & PYQ Category'}
+                </span>
+                <h3 className="text-xl font-black text-gray-900 mt-2">
+                  {selectedCategory === 'JEE' && 'IIT-JEE Mock Exams'}
+                  {selectedCategory === 'NEET' && 'NEET Practice Papers'}
+                  {selectedCategory === 'Boards' && 'Class 11 & 12 Board Papers'}
+                  {selectedCategory === 'NCERT' && 'NCERT & Previous Year Papers'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setSelectedCategory(null)} 
+                className="text-gray-400 hover:text-gray-600 transition-colors w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center font-black text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* List area */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              {getFilteredCategoryTests().length === 0 ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-12 h-12 bg-purple-50 border border-purple-100 text-[#572C7A] rounded-full flex items-center justify-center mx-auto">
+                    <Layers className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-black text-gray-900">No Public Mock Exams Live</p>
+                    <p className="text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">
+                      There are no guest-attempt tests launched for this category yet. You can sign in to attempt batch-locked exams.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      router.push('/login');
+                    }}
+                    className="bg-[#572C7A] hover:bg-[#431f60] text-white px-6 py-2.5 rounded-full font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                  >
+                    Go to Student Login
+                  </button>
+                </div>
+              ) : (
+                getFilteredCategoryTests().map((t) => (
+                  <div 
+                    key={t._id} 
+                    className="bg-purple-50/20 border border-purple-100 rounded-2xl p-5 hover:border-purple-300 hover:bg-purple-50/40 transition-all duration-300 flex items-center justify-between gap-4 group"
+                  >
+                    <div className="min-w-0 space-y-1">
+                      <span className="text-[9px] font-black text-[#572C7A] bg-purple-50 px-2 py-0.5 rounded border border-purple-100 uppercase">
+                        {t.subject}
+                      </span>
+                      <h4 className="text-sm font-bold text-gray-900 truncate">{t.title}</h4>
+                      <div className="flex gap-2 text-[10px] text-gray-500 font-semibold">
+                        <span>{t.durationMinutes} Mins</span>
+                        <span>•</span>
+                        <span>{t.totalMarks} Marks</span>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        setSelectedCategory(null);
+                        router.push(`/test/${t._id}`);
+                      }}
+                      className="bg-[#572C7A] hover:bg-[#431f60] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-colors flex items-center gap-1 group-hover:gap-1.5 cursor-pointer shrink-0"
+                    >
+                      Attempt <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-100 bg-gray-50 flex items-center justify-between text-xs text-gray-500 font-semibold">
+              <span>CBT Exam Simulator V1.0</span>
+              <span>Team Excellent</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="w-full border-t border-gray-100 bg-white py-6 text-center text-xs text-gray-500">
