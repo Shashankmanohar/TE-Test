@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, User, ArrowRight, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://te-app-backend.vercel.app/api';
+const API_BASE = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+  ? 'http://localhost:5000/api'
+  : (process.env.NEXT_PUBLIC_API_URL || 'https://te-app-backend.vercel.app/api');
 
 export default function Login() {
   const router = useRouter();
