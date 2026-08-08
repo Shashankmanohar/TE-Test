@@ -7,6 +7,8 @@ import {
   ChevronRight, Sparkles, Phone, CreditCard, CalendarCheck, ShieldCheck, X, FileQuestion
 } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://te-app-backend.vercel.app/api';
+
 export default function Dashboard() {
   const router = useRouter();
   const [student, setStudent] = useState(null);
@@ -43,14 +45,14 @@ export default function Dashboard() {
     const loadDashboardData = async () => {
       try {
         // Fetch tests
-        const testsRes = await fetch(`http://localhost:5000/api/student/tests?studentId=${studentId}`);
+        const testsRes = await fetch(`${API_BASE}/student/tests?studentId=${studentId}`);
         const testsData = await testsRes.json();
         if (testsData.success) {
           setTests(testsData.tests);
         }
 
         // Fetch results
-        const resultsRes = await fetch(`http://localhost:5000/api/student/results?studentId=${studentId}`);
+        const resultsRes = await fetch(`${API_BASE}/student/results?studentId=${studentId}`);
         const resultsData = await resultsRes.json();
         if (resultsData.success) {
           setResults(resultsData.results);
@@ -75,7 +77,7 @@ export default function Dashboard() {
     setLoadingResultDetails(true);
     setResultQuestions([]);
     try {
-      const res = await fetch(`http://localhost:5000/api/student/tests/${result.testId}/questions`);
+      const res = await fetch(`${API_BASE}/student/tests/${result.testId}/questions`);
       const data = await res.json();
       if (data.success && Array.isArray(data.questions)) {
         setResultQuestions(data.questions);

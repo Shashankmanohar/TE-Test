@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Clock, CheckCircle, HelpCircle, AlertTriangle, ArrowRight } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://te-app-backend.vercel.app/api';
+
 export default function TestSimulator({ params }) {
   const router = useRouter();
   const { id: testId } = use(params);
@@ -49,7 +51,7 @@ export default function TestSimulator({ params }) {
 
     const loadTestData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/student/tests/${testId}/questions`);
+        const res = await fetch(`${API_BASE}/student/tests/${testId}/questions`);
         const data = await res.json();
         if (data.success) {
           setTest(data.test);
@@ -232,7 +234,7 @@ export default function TestSimulator({ params }) {
     const timeTaken = Math.max(1, Math.round((durationMins * 60 - timeRemaining) / 60));
 
     try {
-      const res = await fetch(`http://localhost:5000/api/student/tests/${testId}/submit`, {
+      const res = await fetch(`${API_BASE}/student/tests/${testId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

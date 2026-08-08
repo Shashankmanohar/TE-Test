@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, User, ArrowRight, AlertTriangle, Eye, EyeOff } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://te-app-backend.vercel.app/api';
+
 export default function Login() {
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -18,7 +20,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/student/login', {
+      const res = await fetch(`${API_BASE}/auth/student/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
