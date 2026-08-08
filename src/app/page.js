@@ -204,7 +204,7 @@ export default function Home() {
       </main>
 
       {/* Public Mock Tests Section with Premium Marketing Design */}
-      {!isLoggedIn && publicTests.length > 0 && (
+      {!isLoggedIn && (
         <section className="relative w-full py-16 z-20 px-4 md:px-8">
           <div className="max-w-6xl mx-auto bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden shadow-2xl border border-purple-500/20">
             {/* Visual glow blobs */}
@@ -259,41 +259,53 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                  {publicTests.map((t) => (
-                    <div 
-                      key={t._id} 
-                      className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:border-purple-400/50 hover:bg-white/10 transition-all duration-300 group flex items-center justify-between gap-4"
-                    >
-                      <div className="space-y-1.5 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[9px] font-black text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded border border-purple-800 uppercase tracking-wider">
-                            {t.subject}
-                          </span>
-                          {t.category && t.category !== 'None' && (
-                            <span className="text-[9px] font-black text-amber-300 bg-amber-900/50 px-2 py-0.5 rounded border border-amber-800 uppercase tracking-wider">
-                              {t.category === 'JEE' && 'JEE'}
-                              {t.category === 'NEET' && 'NEET'}
-                              {t.category === 'Boards' && 'Boards'}
-                              {t.category === 'NCERT' && 'NCERT'}
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="text-sm font-bold text-white truncate">{t.title}</h4>
-                        <div className="flex gap-3 text-[10px] text-slate-400 font-semibold">
-                          <span>{t.durationMinutes} Mins</span>
-                          <span>•</span>
-                          <span>{t.totalMarks} Marks</span>
-                        </div>
+                  {publicTests.length === 0 ? (
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center space-y-3">
+                      <div className="w-10 h-10 bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-full flex items-center justify-center mx-auto">
+                        <Layers className="w-5 h-5" />
                       </div>
-                      
-                      <button
-                        onClick={() => router.push(`/test/${t._id}`)}
-                        className="bg-white hover:bg-amber-400 text-slate-900 hover:text-slate-950 px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-md transition-all duration-300 shrink-0 flex items-center gap-1 group-hover:gap-1.5 cursor-pointer"
-                      >
-                        Attempt <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                      <p className="text-xs font-bold text-slate-300">No Live Mock Exams Scheduled</p>
+                      <p className="text-[10px] text-slate-400 leading-relaxed max-w-xs mx-auto">
+                        There are no guest-attempt tests active in the database. Admin can activate and categorize live exams in the dashboard.
+                      </p>
                     </div>
-                  ))}
+                  ) : (
+                    publicTests.map((t) => (
+                      <div 
+                        key={t._id} 
+                        className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:border-purple-400/50 hover:bg-white/10 transition-all duration-300 group flex items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1.5 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[9px] font-black text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded border border-purple-800 uppercase tracking-wider">
+                              {t.subject}
+                            </span>
+                            {t.category && t.category !== 'None' && (
+                              <span className="text-[9px] font-black text-amber-300 bg-amber-900/50 px-2 py-0.5 rounded border border-amber-800 uppercase tracking-wider">
+                                {t.category === 'JEE' && 'JEE'}
+                                {t.category === 'NEET' && 'NEET'}
+                                {t.category === 'Boards' && 'Boards'}
+                                {t.category === 'NCERT' && 'NCERT'}
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="text-sm font-bold text-white truncate">{t.title}</h4>
+                          <div className="flex gap-3 text-[10px] text-slate-400 font-semibold">
+                            <span>{t.durationMinutes} Mins</span>
+                            <span>•</span>
+                            <span>{t.totalMarks} Marks</span>
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={() => router.push(`/test/${t._id}`)}
+                          className="bg-white hover:bg-amber-400 text-slate-900 hover:text-slate-950 px-4 py-2.5 rounded-xl font-extrabold text-xs shadow-md transition-all duration-300 shrink-0 flex items-center gap-1 group-hover:gap-1.5 cursor-pointer"
+                        >
+                          Attempt <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
