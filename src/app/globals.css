@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom grid background pattern */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(87, 44, 122, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(87, 44, 122, 0.05) 1px, transparent 1px);
+}
+
