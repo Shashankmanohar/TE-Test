@@ -60,34 +60,7 @@ export default function Home() {
 
   const getFilteredCategoryTests = () => {
     if (!selectedCategory) return [];
-    if (selectedCategory === 'JEE') {
-      return publicTests.filter(t => 
-        t.batch === 'Target JEE' || 
-        t.batch === 'All Batches' || 
-        t.subject === 'Mathematics' || 
-        t.subject === 'Physics' || 
-        t.subject === 'Chemistry'
-      );
-    }
-    if (selectedCategory === 'NEET') {
-      return publicTests.filter(t => 
-        t.batch === 'Target NEET' || 
-        t.batch === 'All Batches' || 
-        t.subject === 'Biology' || 
-        t.subject === 'Physics' || 
-        t.subject === 'Chemistry'
-      );
-    }
-    if (selectedCategory === 'Boards') {
-      return publicTests.filter(t => 
-        t.batch?.toLowerCase().includes('class') || 
-        t.batch === 'All Batches'
-      );
-    }
-    if (selectedCategory === 'NCERT') {
-      return publicTests;
-    }
-    return [];
+    return publicTests.filter(t => t.category === selectedCategory);
   };
 
   const handleLogout = () => {
@@ -292,10 +265,18 @@ export default function Home() {
                       className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:border-purple-400/50 hover:bg-white/10 transition-all duration-300 group flex items-center justify-between gap-4"
                     >
                       <div className="space-y-1.5 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-[9px] font-black text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded border border-purple-800 uppercase tracking-wider">
                             {t.subject}
                           </span>
+                          {t.category && t.category !== 'None' && (
+                            <span className="text-[9px] font-black text-amber-300 bg-amber-900/50 px-2 py-0.5 rounded border border-amber-800 uppercase tracking-wider">
+                              {t.category === 'JEE' && 'JEE'}
+                              {t.category === 'NEET' && 'NEET'}
+                              {t.category === 'Boards' && 'Boards'}
+                              {t.category === 'NCERT' && 'NCERT'}
+                            </span>
+                          )}
                         </div>
                         <h4 className="text-sm font-bold text-white truncate">{t.title}</h4>
                         <div className="flex gap-3 text-[10px] text-slate-400 font-semibold">
